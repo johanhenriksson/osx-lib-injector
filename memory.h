@@ -17,7 +17,7 @@ void vm_mem_free(vm_mem_t*);
 
 void vm_mem_write(vm_mem_t*, void*, void*, size_t);
 void* vm_mem_read(vm_mem_t*, void*, size_t);
-void vm_mem_mark_execute(vm_mem_t* mem) {
-void vm_mem_mark_write(vm_mem_t* mem) {
+void vm_mem_mark_execute(vm_mem_t* mem);
+void vm_mem_mark_write(vm_mem_t* mem);
 
 #endif

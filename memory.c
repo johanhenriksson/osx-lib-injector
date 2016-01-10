@@ -88,4 +88,4 @@ void vm_mem_mark_write(vm_mem_t* mem) {
             VM_PROT_READ | VM_PROT_WRITE) != KERN_SUCCESS) {
         panic("vm_protect (writable) failed");
     }
-
+}

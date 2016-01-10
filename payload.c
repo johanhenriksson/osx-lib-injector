@@ -6,46 +6,52 @@
 #include <stdio.h>
 
 const char inj_code[] = 
-    "\x90"             // nop
+    // nop
+    "\x90"             
     // setup stack frame
-    "\x55"             // push ebp
-    "\x90\xE5"        // movl ebp, esp
+    // push ebp
+    "\x55"             
+    // movl ebp, esp
+    "\x90\xE5"        
     // allocate 16 bytes on the stack
-	"\x83\xEC\x10"   // subl	$10, %esp
+    // sub	$10, %esp
+	"\x83\xEC\x10"   
 
     // pthread_set_self()
     // ----------------
-    // movl eax, (address of pthread_set_self)
+    // mov eax, (address of pthread_set_self)
     "\xB8" "SELF" 
     // call eax
     "\xFF\0xD0" 
 
-    // dlopen(path, 0);
+    // dlopen(%eip+39, 0);
     // ----------------
     // address of path string buffer 
-	// leal	40(eip), eax
+	// lea	40(eip), eax
     "\x3E\x8D\x40" 
     "\x27" // path buffer offset relative to instruction pointer
-	// movl	eax, 0(esp)
+	// mov	eax, 0(esp)
     "\x36\x89\x04\x24"
-	// movl	$0, 4(esp)
+	// mov	$0, 4(esp)
     "\x36\x66\xC7\x44\x24\x04\x00\x00"
-    // movl eax, (address of dlopen)
+    // mov eax, (address of dlopen)
     "\xB8" "OPEN" 
     // call eax
     "\xFF\xD0" 
 
     // pthread_exit(NULL);
     // ----------------
-	// movl	$0, (%esp) # pass NULL
+    // mov	$0, (%esp) # pass NULL
     "\x36\x66\xC7\x04\x24\x00\x00"
-    // movl eax, (address of pthread_exit)
+    // mov eax, (address of pthread_exit)
     "\xB8" "EXIT" 
     // call eax
     "\xFF\xD0" 
-
-    "\x90" // nop
+    
+    // nop
+    "\x90" 
 ;
+// 56 bytes
 
 // local macros
 #define INJ_SIZE sizeof(inj_code)
@@ -63,6 +69,7 @@ payload_t* prepare_payload(char* path) {
     
     printf("pre size: %d\n", find_pattern("\x3E\x8D\x40", 3, code, INJ_SIZE));
     printf("code start: %lu\n", INJ_SIZE);
+    printf("jump offset: %lu\n", INJ_SIZE - find_pattern("\x3E\x8D\x40", 3, code, INJ_SIZE));
 
     void* addr_pthread_set_self = dlsym(RTLD_DEFAULT, "_pthread_set_self"); 
     void* addr_pthread_exit = dlsym(RTLD_DEFAULT, "pthread_exit"); 
@@ -119,4 +126,3 @@ int find_pattern(char* pattern, int length, void* start, int scan) {
     }
     return -1;
 }
-
